@@ -12,18 +12,22 @@
 
 <style>
   :root {
-    --bg-dark: #090d16;
+    --bg-dark: #070a12;
     --bg-surface: #0f172a;
     --bg-card: rgba(30, 41, 59, 0.75);
     --border-color: rgba(255, 255, 255, 0.1);
-    --border-glow: rgba(99, 102, 241, 0.3);
-    --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    --accent-hover: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    
+    /* Dynamic Theme Defaults: Indigo Pulse */
     --accent-color: #6366f1;
     --accent-light: #818cf8;
+    --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    --accent-hover: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    --border-glow: rgba(99, 102, 241, 0.35);
+    --radial-hue: #1e1b4b;
+
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
-    --user-bubble-bg: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    --user-bubble-bg: var(--accent-gradient);
     --agent-bubble-bg: rgba(30, 41, 59, 0.85);
   }
 
@@ -31,20 +35,21 @@
   body {
     margin: 0;
     font-family: 'Outfit', system-ui, -apple-system, sans-serif;
-    background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #090d16 70%);
+    background: radial-gradient(circle at 50% 0%, var(--radial-hue) 0%, var(--bg-dark) 75%);
     color: var(--text-main);
     display: flex;
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
+    transition: background 0.4s ease;
   }
 
   /* Header Branding */
   header {
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(12px);
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border-color);
-    padding: 0.9rem 1.5rem;
+    padding: 0.85rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -64,7 +69,8 @@
     align-items: center;
     justify-content: center;
     font-size: 1.25rem;
-    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 15px var(--border-glow);
+    transition: all 0.3s ease;
   }
   .brand-title {
     font-weight: 700;
@@ -73,10 +79,47 @@
     color: #ffffff;
   }
   .brand-subtitle {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--text-muted);
     font-weight: 400;
   }
+
+  /* Header Controls & Theme Picker */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+  }
+
+  .theme-picker {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid var(--border-color);
+    padding: 0.3rem 0.55rem;
+    border-radius: 20px;
+  }
+  .theme-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-right: 0.2rem;
+  }
+  .theme-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+  .theme-dot:hover, .theme-dot.active {
+    transform: scale(1.25);
+    border-color: #ffffff;
+    box-shadow: 0 0 8px currentColor;
+  }
+
   .status-pill {
     display: flex;
     align-items: center;
@@ -102,7 +145,7 @@
     flex: 1;
     overflow-y: auto;
     padding: 1.5rem;
-    max-width: 840px;
+    max-width: 860px;
     width: 100%;
     margin: 0 auto;
     display: flex;
@@ -110,27 +153,112 @@
     gap: 1.25rem;
   }
 
-  /* Welcome Banner */
-  .welcome-card {
+  /* Brief Introduction Card */
+  .intro-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--border-glow);
+    border-radius: 18px;
+    padding: 1.35rem 1.5rem;
+    margin-bottom: 0.5rem;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .intro-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: var(--accent-gradient);
+  }
+  .intro-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+  }
+  .intro-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .intro-badge {
+    background: var(--accent-gradient);
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .toggle-intro-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+    transition: color 0.2s;
+  }
+  .toggle-intro-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+
+  .intro-text {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin: 0 0 1rem 0;
+  }
+
+  /* Capability Badges Grid */
+  .capabilities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.65rem;
+  }
+  .cap-item {
     background: rgba(30, 41, 59, 0.5);
     border: 1px solid var(--border-color);
-    border-radius: 16px;
-    padding: 1.25rem;
-    text-align: center;
-    margin-bottom: 0.5rem;
-    backdrop-filter: blur(8px);
+    padding: 0.65rem 0.85rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    font-size: 0.82rem;
+    transition: all 0.2s ease;
   }
-  .welcome-card h3 {
-    margin: 0 0 0.4rem 0;
+  .cap-item:hover {
+    border-color: var(--accent-light);
+    background: rgba(30, 41, 59, 0.8);
+    transform: translateY(-1px);
+  }
+  .cap-icon {
     font-size: 1.1rem;
-    color: var(--accent-light);
+    line-height: 1;
+    margin-top: 0.1rem;
   }
-  .welcome-card p {
-    margin: 0;
-    font-size: 0.88rem;
+  .cap-title {
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.15rem;
+  }
+  .cap-desc {
     color: var(--text-muted);
-    line-height: 1.5;
+    font-size: 0.77rem;
+    line-height: 1.35;
   }
+
+  /* Collapsed state */
+  .intro-card.collapsed .intro-body { display: none; }
+  .intro-card.collapsed { padding-bottom: 0.9rem; }
 
   /* Dialogue Message Rows */
   .msg-row {
@@ -150,13 +278,13 @@
   }
 
   .avatar {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     flex-shrink: 0;
   }
   .msg-row.user .avatar {
@@ -165,7 +293,7 @@
   }
   .msg-row.agent .avatar {
     background: var(--accent-gradient);
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 12px var(--border-glow);
   }
 
   .msg-content {
@@ -185,7 +313,7 @@
   }
 
   .bubble {
-    padding: 0.75rem 1.1rem;
+    padding: 0.8rem 1.15rem;
     border-radius: 16px;
     font-size: 0.95rem;
     line-height: 1.5;
@@ -197,7 +325,7 @@
     background: var(--user-bubble-bg);
     color: #ffffff;
     border-bottom-right-radius: 4px;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25);
+    box-shadow: 0 4px 15px var(--border-glow);
   }
 
   .msg-row.agent .bubble {
@@ -205,7 +333,7 @@
     color: var(--text-main);
     border: 1px solid var(--border-color);
     border-bottom-left-radius: 4px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
     backdrop-filter: blur(10px);
   }
 
@@ -221,11 +349,11 @@
 
   /* Prompts Bar Above Input */
   .footer-container {
-    background: rgba(15, 23, 42, 0.9);
+    background: rgba(15, 23, 42, 0.92);
     backdrop-filter: blur(16px);
     border-top: 1px solid var(--border-color);
     padding: 0.8rem 1.5rem 1.2rem;
-    max-width: 840px;
+    max-width: 860px;
     width: 100%;
     margin: 0 auto;
   }
@@ -244,7 +372,7 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    background: rgba(30, 41, 59, 0.7);
+    background: rgba(30, 41, 59, 0.75);
     border: 1px solid var(--border-color);
     color: var(--text-main);
     padding: 0.45rem 0.85rem;
@@ -256,10 +384,10 @@
     transition: all 0.2s ease;
   }
   .prompt-chip:hover {
-    background: rgba(99, 102, 241, 0.2);
+    background: rgba(255, 255, 255, 0.08);
     border-color: var(--accent-light);
     transform: translateY(-1px);
-    box-shadow: 0 2px 10px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 2px 10px var(--border-glow);
   }
   .chip-icon { font-size: 0.95rem; }
 
@@ -290,7 +418,7 @@
   input::placeholder { color: var(--text-muted); }
   input:focus {
     border-color: var(--accent-color);
-    box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 14px var(--border-glow);
     background: rgba(15, 23, 42, 0.95);
   }
 
@@ -305,7 +433,7 @@
     font-family: inherit;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 14px var(--border-glow);
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -313,7 +441,7 @@
   button.send-btn:hover {
     background: var(--accent-hover);
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 18px var(--border-glow);
   }
 
   /* --- A2UI Component Render Styling --- */
@@ -373,21 +501,90 @@
       <div class="brand-subtitle">Personal Workout & Fitness Coach</div>
     </div>
   </div>
-  <div class="status-pill">
-    <span class="status-dot"></span>
-    Active Coach
+
+  <div class="header-actions">
+    <!-- Dynamic Color Theme Selector -->
+    <div class="theme-picker" title="Switch Theme Color">
+      <span class="theme-label">Theme:</span>
+      <div class="theme-dot active" style="background: #6366f1;" onclick="setTheme('indigo')" title="Indigo Pulse"></div>
+      <div class="theme-dot" style="background: #06b6d4;" onclick="setTheme('cyan')" title="Electric Cyan"></div>
+      <div class="theme-dot" style="background: #f43f5e;" onclick="setTheme('coral')" title="Sunset Flame"></div>
+      <div class="theme-dot" style="background: #10b981;" onclick="setTheme('emerald')" title="Neon Emerald"></div>
+    </div>
+
+    <div class="status-pill">
+      <span class="status-dot"></span>
+      Active Coach
+    </div>
   </div>
 </header>
 
 <div id="log">
-  <div class="welcome-card">
-    <h3>👋 Welcome to ApexFit AI!</h3>
-    <p>Ask for customized workout plans, exercise movement cues, 1-Rep Max calculations, or explore our dynamic exercise library.</p>
+  <!-- Brief Introduction Card -->
+  <div class="intro-card" id="introCard">
+    <div class="intro-header">
+      <div class="intro-title">
+        <span>⚡ Welcome to ApexFit AI</span>
+        <span class="intro-badge">Personalized AI Coach</span>
+      </div>
+      <button type="button" class="toggle-intro-btn" onclick="toggleIntro()">
+        <span id="toggleIntroIcon">▲</span>
+        <span id="toggleIntroText">Hide Intro</span>
+      </button>
+    </div>
+    
+    <div class="intro-body">
+      <p class="intro-text">
+        ApexFit AI is your autonomous fitness intelligence engine. Powered by Google Gemini, Firestore exercise libraries, and Gemini Omni motion models, ApexFit creates custom training routines, movement guides, and instant calculations.
+      </p>
+
+      <div class="capabilities-grid">
+        <div class="cap-item">
+          <span class="cap-icon">🏋️</span>
+          <div>
+            <div class="cap-title">Adaptive Workouts</div>
+            <div class="cap-desc">Custom hypertrophy, strength, and split routines rendered in A2UI cards.</div>
+          </div>
+        </div>
+
+        <div class="cap-item">
+          <span class="cap-icon">🎥</span>
+          <div>
+            <div class="cap-title">Gemini Omni Motion</div>
+            <div class="cap-desc">Generated exercise movement technique videos and visual form cues.</div>
+          </div>
+        </div>
+
+        <div class="cap-item">
+          <span class="cap-icon">⚡</span>
+          <div>
+            <div class="cap-title">Fitness Math & 1RM</div>
+            <div class="cap-desc">1-Rep Max calculations, target heart rate zones, and calorie metrics.</div>
+          </div>
+        </div>
+
+        <div class="cap-item">
+          <span class="cap-icon">📍</span>
+          <div>
+            <div class="cap-title">Nearby Gym Finder</div>
+            <div class="cap-desc">Discover nearby gyms, fitness centers, and sports facilities via Google Maps.</div>
+          </div>
+        </div>
+
+        <div class="cap-item">
+          <span class="cap-icon">🧠</span>
+          <div>
+            <div class="cap-title">Memory Bank</div>
+            <div class="cap-desc">Remembers your fitness goals, past injuries, and personal records across sessions.</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="footer-container">
-  <!-- Clickable 3 Example Prompt Chips -->
+  <!-- Clickable Example Prompt Chips -->
   <div class="prompts-bar">
     <button type="button" class="prompt-chip" onclick="sendPrompt('Suggest a 3-exercise chest routine')">
       <span class="chip-icon">🏋️</span>
@@ -417,6 +614,78 @@
 const log = document.getElementById("log");
 const form = document.getElementById("form");
 const input = document.getElementById("input");
+
+/* ----------------------------------------------------------------------------
+ * Dynamic Color Themes Setup
+ * -------------------------------------------------------------------------- */
+const THEMES = {
+  indigo: {
+    accentColor: "#6366f1",
+    accentLight: "#818cf8",
+    gradient: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+    hover: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+    glow: "rgba(99, 102, 241, 0.35)",
+    hue: "#1e1b4b"
+  },
+  cyan: {
+    accentColor: "#06b6d4",
+    accentLight: "#38bdf8",
+    gradient: "linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)",
+    hover: "linear-gradient(135deg, #0891b2 0%, #2563eb 100%)",
+    glow: "rgba(6, 182, 212, 0.35)",
+    hue: "#0c4a6e"
+  },
+  coral: {
+    accentColor: "#f43f5e",
+    accentLight: "#fb7185",
+    gradient: "linear-gradient(135deg, #f43f5e 0%, #fb923c 100%)",
+    hover: "linear-gradient(135deg, #e11d48 0%, #f97316 100%)",
+    glow: "rgba(244, 63, 94, 0.35)",
+    hue: "#4c0519"
+  },
+  emerald: {
+    accentColor: "#10b981",
+    accentLight: "#34d399",
+    gradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+    hover: "linear-gradient(135deg, #059669 0%, #047857 100%)",
+    glow: "rgba(16, 185, 129, 0.35)",
+    hue: "#064e3b"
+  }
+};
+
+function setTheme(name) {
+  const t = THEMES[name] || THEMES.indigo;
+  const root = document.documentElement;
+  root.style.setProperty("--accent-color", t.accentColor);
+  root.style.setProperty("--accent-light", t.accentLight);
+  root.style.setProperty("--accent-gradient", t.gradient);
+  root.style.setProperty("--accent-hover", t.hover);
+  root.style.setProperty("--border-glow", t.glow);
+  root.style.setProperty("--radial-hue", t.hue);
+
+  document.querySelectorAll(".theme-dot").forEach(d => d.classList.remove("active"));
+  const activeDot = document.querySelector(`.theme-dot[onclick*="${name}"]`);
+  if (activeDot) activeDot.classList.add("active");
+
+  try { localStorage.setItem("apexfit_theme", name); } catch(e) {}
+}
+
+// Restore saved theme on load
+(function initTheme() {
+  try {
+    const saved = localStorage.getItem("apexfit_theme");
+    if (saved && THEMES[saved]) setTheme(saved);
+  } catch(e) {}
+})();
+
+function toggleIntro() {
+  const card = document.getElementById("introCard");
+  const icon = document.getElementById("toggleIntroIcon");
+  const text = document.getElementById("toggleIntroText");
+  const isCollapsed = card.classList.toggle("collapsed");
+  icon.textContent = isCollapsed ? "▼" : "▲";
+  text.textContent = isCollapsed ? "Show Intro" : "Hide Intro";
+}
 
 function el(tag, cls, text) {
   const e = document.createElement(tag);
