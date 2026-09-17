@@ -1,0 +1,11 @@
+.gcloudignore
+.git
+.venv
+node_modules
+demo.gif
+agent_demo.webm
+*.webm
+*.gif
+.video_tmp
+tests
+frontend
