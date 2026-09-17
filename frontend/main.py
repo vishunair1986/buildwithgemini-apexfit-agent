@@ -112,6 +112,9 @@ async def _get_card(client: httpx.AsyncClient) -> AgentCard:
     return _card
 
 
+import json
+import re
+
 def _extract_parts(parts: list) -> list[dict]:
     """Turn A2A response parts into structured parts for the chat UI.
 
@@ -124,7 +127,44 @@ def _extract_parts(parts: list) -> list[dict]:
     for p in parts:
         root = getattr(p, "root", p)
         if isinstance(root, TextPart) and getattr(root, "text", None):
-            out.append({"kind": "text", "text": root.text})
+            text = root.text or ""
+            if "<a2a_datapart_json>" in text:
+                matches = re.findall(r"<a2a_datapart_json>(.*?)</a2a_datapart_json>", text, re.DOTALL)
+                parsed_any = False
+                for m in matches:
+                    try:
+                        parsed = json.loads(m.strip())
+                        if isinstance(parsed, dict) and parsed.get("data"):
+                            out.append({"kind": "a2ui", "data": parsed["data"]})
+                            parsed_any = True
+                        elif isinstance(parsed, dict) and any(k in parsed for k in ("beginRendering", "surfaceUpdate", "dataModelUpdate")):
+                            out.append({"kind": "a2ui", "data": parsed})
+                            parsed_any = True
+                    except Exception:
+                        pass
+                if not parsed_any:
+                    out.append({"kind": "text", "text": text})
+            else:
+                s_text = text.strip()
+                if (s_text.startswith("{") or s_text.startswith("[")) and any(k in s_text for k in ("surfaceUpdate", "beginRendering", "Card", "Column")):
+                    try:
+                        parsed = json.loads(s_text)
+                        if isinstance(parsed, list):
+                            for item in parsed:
+                                if isinstance(item, dict):
+                                    if item.get("data"):
+                                        out.append({"kind": "a2ui", "data": item["data"]})
+                                    elif any(k in item for k in ("beginRendering", "surfaceUpdate", "dataModelUpdate")):
+                                        out.append({"kind": "a2ui", "data": item})
+                        elif isinstance(parsed, dict):
+                            if parsed.get("data"):
+                                out.append({"kind": "a2ui", "data": parsed["data"]})
+                            elif any(k in parsed for k in ("beginRendering", "surfaceUpdate", "dataModelUpdate")):
+                                out.append({"kind": "a2ui", "data": parsed})
+                    except Exception:
+                        out.append({"kind": "text", "text": text})
+                else:
+                    out.append({"kind": "text", "text": text})
         elif getattr(root, "data", None) is not None:
             meta = getattr(root, "metadata", None) or {}
             mime = meta.get("mimeType") if isinstance(meta, dict) else None

@@ -556,8 +556,49 @@ function flattenText(messages) {
 
 function renderReply(b, parts) {
   b.textContent = "";
-  const texts = parts.filter(p => p && (p.kind === "text" || (!p.kind && p.text))).map(p => p.text || "");
-  const a2ui = parts.filter(p => p && p.kind === "a2ui" && p.data).map(p => p.data);
+  const processed = [];
+  for (const p of parts) {
+    if (!p) continue;
+    if (p.kind === "a2ui" && p.data) {
+      processed.push(p);
+    } else if (p.kind === "text" || p.text) {
+      let txt = (p.text || "").trim();
+      if (txt.includes("<a2a_datapart_json>")) {
+        const matches = txt.match(/<a2a_datapart_json>([\s\S]*?)<\/a2a_datapart_json>/g);
+        if (matches) {
+          for (const m of matches) {
+            const rawJson = m.replace(/<\/?a2a_datapart_json>/g, "").trim();
+            try {
+              const obj = JSON.parse(rawJson);
+              if (obj.data) processed.push({ kind: "a2ui", data: obj.data });
+              else if (obj.beginRendering || obj.surfaceUpdate) processed.push({ kind: "a2ui", data: obj });
+            } catch (e) {}
+          }
+        }
+      } else if ((txt.startsWith("{") || txt.startsWith("[")) && (txt.includes("surfaceUpdate") || txt.includes("beginRendering"))) {
+        try {
+          const obj = JSON.parse(txt);
+          if (Array.isArray(obj)) {
+            for (const item of obj) {
+              if (item.data) processed.push({ kind: "a2ui", data: item.data });
+              else if (item.beginRendering || item.surfaceUpdate) processed.push({ kind: "a2ui", data: item });
+            }
+          } else if (obj.data) {
+            processed.push({ kind: "a2ui", data: obj.data });
+          } else if (obj.beginRendering || obj.surfaceUpdate) {
+            processed.push({ kind: "a2ui", data: obj });
+          }
+        } catch (e) {
+          processed.push({ kind: "text", text: txt });
+        }
+      } else {
+        processed.push({ kind: "text", text: txt });
+      }
+    }
+  }
+
+  const texts = processed.filter(p => p.kind === "text" && p.text).map(p => p.text);
+  const a2ui = processed.filter(p => p.kind === "a2ui" && p.data).map(p => p.data);
 
   const textStr = texts.join("\n").trim();
   if (textStr) b.appendChild(el("div", null, textStr));
